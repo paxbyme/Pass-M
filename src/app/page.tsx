@@ -28,6 +28,7 @@ import {
   KeyRound,
   CheckCircle2,
   Fingerprint,
+  Sparkles,
 } from 'lucide-react'
 import { signInAnonymously } from 'firebase/auth'
 import { getDoc, setDoc } from 'firebase/firestore'
@@ -101,7 +102,7 @@ function BackgroundDots() {
 // Component
 // ---------------------------------------------------------------------------
 
-type Step = 'loading' | 'setup' | 'unlock'
+type Step = 'loading' | 'setup' | 'unlock' | 'success'
 
 export default function LockScreen() {
   const router = useRouter()
@@ -179,7 +180,8 @@ export default function LockScreen() {
       })
 
       unlock(key, userId, null, salt)
-      router.push('/vault')
+      setStep('success')
+      setTimeout(() => router.push('/vault'), 2200)
     } catch (err) {
       console.error('[LockScreen] Setup failed:', err)
       setError('Failed to create vault. Please try again.')
@@ -263,6 +265,82 @@ export default function LockScreen() {
                 <ShieldCheck size={28} className="text-white" />
               </div>
               <Loader2 size={18} className="animate-spin text-muted-foreground" />
+            </motion.div>
+          )}
+
+          {/* Success modal */}
+          {step === 'success' && (
+            <motion.div
+              key="success"
+              initial={{ opacity: 0, scale: 0.88, y: 24 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.92, y: -16 }}
+              transition={{ duration: 0.42, ease: [0.22, 1, 0.36, 1] }}
+              className="flex flex-col items-center gap-6"
+            >
+              <div className="relative flex items-center justify-center">
+                {/* Pulsing glow ring */}
+                <motion.div
+                  animate={{ scale: [1, 1.25, 1], opacity: [0.4, 0.1, 0.4] }}
+                  transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                  className="absolute h-28 w-28 rounded-full"
+                  style={{ background: 'radial-gradient(circle, rgba(20,184,166,0.35) 0%, transparent 70%)' }}
+                />
+                <div className="relative flex h-20 w-20 items-center justify-center rounded-2xl bg-gradient-to-br from-success-500/20 to-accent-600/20 border border-success-500/30 shadow-[0_0_40px_rgba(20,184,166,0.25)]">
+                  <motion.div
+                    initial={{ scale: 0, rotate: -30 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.15, type: 'spring', stiffness: 260, damping: 18 }}
+                  >
+                    <CheckCircle2 size={40} className="text-success-400" />
+                  </motion.div>
+                </div>
+              </div>
+
+              <div className="rounded-2xl border border-navy-700/40 bg-[hsl(240_12%_7%/0.90)] px-8 py-8 shadow-[0_8px_48px_rgba(0,0,0,0.55),inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur-2xl w-full text-center space-y-3">
+                <motion.div
+                  initial={{ opacity: 0, y: 8 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Sparkles size={16} className="text-accent-400" />
+                  <h2 className="text-xl font-bold tracking-tight text-foreground">
+                    Vault Created!
+                  </h2>
+                  <Sparkles size={16} className="text-accent-400" />
+                </motion.div>
+
+                <motion.p
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-sm text-muted-foreground leading-relaxed"
+                >
+                  Your encrypted vault is ready. All credentials are protected
+                  with AES-256 and never leave your device.
+                </motion.p>
+
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: 0.45 }}
+                  className="pt-2"
+                >
+                  <Button
+                    variant="accent"
+                    size="lg"
+                    className="w-full"
+                    onClick={() => router.push('/vault')}
+                  >
+                    <KeyRound size={16} />
+                    Enter Vault
+                  </Button>
+                  <p className="mt-3 text-xs text-muted-foreground/40">
+                    Redirecting automatically…
+                  </p>
+                </motion.div>
+              </div>
             </motion.div>
           )}
 
