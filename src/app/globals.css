@@ -1,27 +1,319 @@
+/* ============================================================
+   PassM — Global Stylesheet
+   Dark-first design system with shadcn/ui CSS-variable convention
+   ============================================================ */
+
+/* Google Fonts — Inter */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================================
+   CSS Variables — shadcn/ui compatible (HSL channels only)
+   ============================================================ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light mode values (rarely used — app is dark-first) */
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+
+  --card: 240 10% 5.5%;
+  --card-foreground: 0 0% 98%;
+
+  --popover: 240 10% 5.5%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 243 75% 59%;       /* navy-500 #6366f1 */
+  --primary-foreground: 0 0% 100%;
+
+  --secondary: 240 5% 14%;
+  --secondary-foreground: 0 0% 90%;
+
+  --muted: 240 5% 14%;
+  --muted-foreground: 240 5% 55%;
+
+  --accent: 174 72% 40%;        /* accent-600 #0d9488 */
+  --accent-foreground: 0 0% 100%;
+
+  --destructive: 0 72% 51%;     /* danger-500 #ef4444 */
+  --destructive-foreground: 0 0% 100%;
+
+  --border: 240 6% 18%;
+  --input: 240 6% 18%;
+  --ring: 243 75% 59%;
+
+  --radius: 0.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* The app ships dark-first; light overrides require .light class */
+.light {
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 240 10% 3.9%;
+  --primary: 243 75% 59%;
+  --primary-foreground: 0 0% 100%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 174 72% 40%;
+  --accent-foreground: 0 0% 100%;
+  --destructive: 0 72% 51%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 243 75% 59%;
+}
+
+/* ============================================================
+   Base reset & defaults
+   ============================================================ */
+@layer base {
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    min-height: 100dvh;
+  }
+
+  /* Focus ring — keyboard-only, consistent across the app */
+  :focus-visible {
+    outline: 2px solid hsl(var(--ring));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Remove default focus ring for mouse/touch */
+  :focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   Custom scrollbar — thin, navy-tinted
+   ============================================================ */
+@layer base {
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: hsl(var(--background));
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(243 75% 35% / 0.5);
+    border-radius: 9999px;
+    transition: background 0.2s ease;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(243 75% 50% / 0.75);
+  }
+
+  /* Firefox */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(243 75% 35% / 0.5) transparent;
+  }
 }
 
+/* ============================================================
+   Component classes
+   ============================================================ */
+@layer components {
+  /**
+   * .vault-card
+   * Glass-morphism card for credential entries and panels.
+   */
+  .vault-card {
+    @apply rounded-vault-card border border-navy-700/30;
+    background: linear-gradient(
+      135deg,
+      hsl(240 10% 7% / 0.9) 0%,
+      hsl(240 10% 5% / 0.95) 100%
+    );
+    backdrop-filter: blur(12px) saturate(180%);
+    -webkit-backdrop-filter: blur(12px) saturate(180%);
+    box-shadow:
+      0 0 0 1px rgba(99, 102, 241, 0.08),
+      0 4px 24px rgba(0, 0, 0, 0.4),
+      inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    transition:
+      box-shadow 0.2s ease,
+      border-color 0.2s ease,
+      transform 0.15s ease;
+  }
+
+  .vault-card:hover {
+    border-color: rgba(99, 102, 241, 0.2);
+    box-shadow:
+      0 0 0 1px rgba(99, 102, 241, 0.18),
+      0 8px 32px rgba(0, 0, 0, 0.5),
+      inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  }
+
+  /**
+   * .vault-card-selected
+   * Active/selected state for credential list items.
+   */
+  .vault-card-selected {
+    border-color: rgba(99, 102, 241, 0.4) !important;
+    box-shadow:
+      0 0 0 1px rgba(99, 102, 241, 0.3),
+      0 0 20px rgba(99, 102, 241, 0.15),
+      0 8px 32px rgba(0, 0, 0, 0.5) !important;
+  }
+
+  /**
+   * .password-field
+   * Monospaced display for passwords, secret keys, etc.
+   */
+  .password-field {
+    font-family: "JetBrains Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 0.875rem;
+    letter-spacing: 0.05em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /**
+   * .skeleton
+   * Shimmer placeholder while loading.
+   */
+  .skeleton {
+    @apply rounded-md;
+    background: linear-gradient(
+      90deg,
+      hsl(240 10% 10%) 0%,
+      hsl(240 10% 14%) 50%,
+      hsl(240 10% 10%) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+  }
+
+  /**
+   * .strength-bar
+   * Animated password strength indicator track.
+   */
+  .strength-bar {
+    @apply h-1 rounded-full overflow-hidden;
+    background: hsl(var(--muted));
+  }
+
+  .strength-bar-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
+
+  /**
+   * .glass-panel
+   * Lighter glass effect for sidebars / modals.
+   */
+  .glass-panel {
+    background: hsl(240 10% 6% / 0.85);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid hsl(240 6% 18% / 0.8);
+  }
+
+  /**
+   * .nav-item
+   * Sidebar navigation item.
+   */
+  .nav-item {
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium
+           text-muted-foreground transition-all duration-150
+           hover:text-foreground hover:bg-white/5;
+  }
+
+  .nav-item-active {
+    @apply text-foreground bg-navy-600/20;
+    box-shadow: inset 2px 0 0 hsl(var(--primary));
+  }
+
+  /**
+   * .btn-primary
+   * Primary CTA button — navy gradient.
+   */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg
+           text-sm font-semibold text-white transition-all duration-150
+           focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+    box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, #818cf8 0%, #6366f1 100%);
+    box-shadow: 0 4px 16px rgba(99, 102, 241, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(99, 102, 241, 0.3);
+  }
+
+  .btn-primary:disabled {
+    @apply opacity-50 cursor-not-allowed;
+    box-shadow: none;
+  }
+}
+
+/* ============================================================
+   Utility overrides
+   ============================================================ */
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Gradient text — for headings */
+  .text-gradient {
+    background: linear-gradient(135deg, #818cf8 0%, #5eead4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Hide scrollbar but keep scroll functionality */
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Truncate with fade instead of ellipsis */
+  .fade-truncate {
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+  .fade-truncate::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2rem;
+    background: linear-gradient(to right, transparent, hsl(var(--background)));
   }
 }
